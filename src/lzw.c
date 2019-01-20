@@ -1,0 +1,104 @@
+#include "lzw.h"
+#include "lzw_bits.h"
+#include "lzw_table.h"
+#include <stdio.h>
+#include <stdlib.h>
+
+void lzw_compress(unsigned char *src,
+                  unsigned long size,
+                  unsigned char bit_size,
+                  unsigned char **output,
+                  unsigned long *out_len) {
+  unsigned char bit_width = bit_size + 1;
+  struct lzw_bit_writer b;
+  struct lzw_table ctable;
+
+  if (!output) return;
+  if (!out_len) return;
+  lzw_bw_init(&b, BIT_BUFFER, NULL);
+  lzw_table_init(&ctable, LZW_TABLE_COMPRESS, bit_size);
+  for (;;) {
+    unsigned int code = 0;
+    struct lzw_entry e = { 0 };
+
+    do {
+      e.val = *src++;
+      e.prev = code;
+      e.len++;
+      size--;
+      if (!size) {
+        lzw_bw_pack(&b, bit_width, code);
+        code = *--src;
+        break;
+      }
+    } while (lzw_table_lookup_entry(&ctable, &e, &code));
+    lzw_table_add(&ctable, &e);
+    lzw_bw_pack(&b, bit_width, code);
+    if (ctable.n_entries > (1 << bit_width)) bit_width++;
+    if (!size) break;
+    size++;
+    src--;
+  }
+  lzw_table_deinit(&ctable);
+  *output = lzw_bw_result(&b);
+  *out_len = b.buf.len;
+}
+
+void lzw_decompress(unsigned char *src,
+                    unsigned long size,
+                    unsigned char bit_size,
+                    unsigned char **result,
+                    unsigned long *out_len) {
+  unsigned char bit_width = bit_size + 1;
+  unsigned int code;
+  struct lzw_bit_reader b;
+  struct lzw_table dtable;
+  struct lzw_buffer output;
+
+  if (!src) return;
+  if (!result) return;
+  if (!out_len) return;
+  lzw_buf_init(&output, 4096);
+  lzw_table_init(&dtable, LZW_TABLE_DECOMPRESS, bit_size);
+  lzw_br_init(&b, BIT_BUFFER, src, size);
+  while (lzw_br_read(&b, bit_width, &code)) {
+    struct lzw_entry cur;
+
+    /* LZW clear code */
+    if (code == (1 << bit_size)) {
+      bit_width = bit_size + 1;
+      dtable.n_entries = (1 << bit_size) + 2;
+      continue;
+    }
+    /* explicit error code */
+    if (code == (1 << bit_size) + 1) break;
+    if (lzw_table_lookup_code(&dtable, code, &cur)) {
+      unsigned int next_code;
+      unsigned long i;
+      struct lzw_buffer buf;
+      struct lzw_entry new, next;
+
+      lzw_table_str(&dtable, code, &buf);
+      for (i = buf.len; i > 0; --i) {
+        lzw_buf_push(&output, buf.ptr[i - 1]);
+      }
+      free(buf.ptr);
+      if ((dtable.n_entries + 1 > (1 << bit_width)) &&
+          (bit_width < LZW_MAX_ENTRY_EXP)) {
+        bit_width++;
+      }
+      if (!lzw_br_peek(&b, bit_width, &next_code)) continue;
+      new.len = cur.len + 1;
+      if (lzw_table_lookup_code(&dtable, next_code, &next)) {
+        new.val = lzw_entry_head(&dtable, &next);
+      } else {
+        new.val = lzw_entry_head(&dtable, &cur);
+      }
+      new.prev = code;
+      lzw_table_add(&dtable, &new);
+    }
+  }
+  lzw_table_deinit(&dtable);
+  *result = output.ptr;
+  *out_len = output.len;
+}
