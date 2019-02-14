@@ -1,5 +1,5 @@
 #include "lzw_table.h"
-#include "lzw_buffer.h"
+#include <darray.h>
 #include <stdlib.h>
 
 static const unsigned char pearson_table[] = {
@@ -147,7 +147,7 @@ int lzw_table_lookup_code(struct lzw_table *t,
 
 void lzw_table_str(struct lzw_table *t,
                    unsigned int code,
-                   struct lzw_buffer *out_buf) {
+                   struct darray **out_buf) {
   unsigned long i, size;
   struct lzw_entry e;
 
@@ -156,9 +156,9 @@ void lzw_table_str(struct lzw_table *t,
   if (code > t->n_entries) return;
   if (!lzw_table_lookup_code(t, code, &e)) return;
   size = e.len;
-  lzw_buf_init(out_buf, size);
+  *out_buf = danew(size);
   for (i = 0; i < size; ++i) {
-    lzw_buf_push(out_buf, e.val);
+    dapush(*out_buf, e.val);
     lzw_table_lookup_code(t, e.prev, &e);
   }
 }

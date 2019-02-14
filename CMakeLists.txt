@@ -3,9 +3,9 @@ project(lzw LANGUAGES C)
 add_library(lzw
   "src/lzw.c"
   "src/lzw_bits.c"
-  "src/lzw_buffer.c"
   "src/lzw_table.c"
   )
+add_dependencies(lzw darray)
 target_include_directories(lzw PUBLIC "src/")
 target_compile_options(lzw
   PRIVATE "-std=c89"
@@ -13,3 +13,4 @@ target_compile_options(lzw
   PRIVATE "-Wall"
   PRIVATE "-Wconversion"
   )
+target_link_libraries(lzw darray)

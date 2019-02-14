@@ -1,7 +1,7 @@
 #ifndef LZW_TABLE_H
 #define LZW_TABLE_H
 
-#include "lzw_buffer.h"
+#include <darray.h>
 
 #define LZW_MAX_ENTRY_EXP 12
 #define LZW_MAX_ENTRIES (1 << LZW_MAX_ENTRY_EXP)
@@ -39,7 +39,7 @@ int lzw_table_lookup_code(struct lzw_table *t,
                           struct lzw_entry *e);
 void lzw_table_str(struct lzw_table *t,
                    unsigned int code,
-                   struct lzw_buffer *out_buf);
+                   struct darray **out_buf);
 unsigned char lzw_entry_head(struct lzw_table *t, struct lzw_entry *e);
 
 #endif

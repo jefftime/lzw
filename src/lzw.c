@@ -1,6 +1,7 @@
 #include "lzw.h"
 #include "lzw_bits.h"
 #include "lzw_table.h"
+#include <darray.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -40,8 +41,8 @@ void lzw_compress(unsigned char *src,
     src--;
   }
   lzw_table_deinit(&ctable);
+  *out_len = dalen(b.buf);
   *output = lzw_bw_result(&b);
-  *out_len = b.buf.len;
 }
 
 void lzw_decompress(unsigned char *src,
@@ -53,12 +54,12 @@ void lzw_decompress(unsigned char *src,
   unsigned int code;
   struct lzw_bit_reader b;
   struct lzw_table dtable;
-  struct lzw_buffer output;
+  struct darray *output;
 
   if (!src) return;
   if (!result) return;
   if (!out_len) return;
-  lzw_buf_init(&output, 4096);
+  output = danew(4096);
   lzw_table_init(&dtable, LZW_TABLE_DECOMPRESS, bit_size);
   lzw_br_init(&b, BIT_BUFFER, src, size);
   while (lzw_br_read(&b, bit_width, &code)) {
@@ -75,14 +76,14 @@ void lzw_decompress(unsigned char *src,
     if (lzw_table_lookup_code(&dtable, code, &cur)) {
       unsigned int next_code;
       unsigned long i;
-      struct lzw_buffer buf;
+      struct darray *buf;
       struct lzw_entry new, next;
 
       lzw_table_str(&dtable, code, &buf);
-      for (i = buf.len; i > 0; --i) {
-        lzw_buf_push(&output, buf.ptr[i - 1]);
+      for (i = dalen(buf); i > 0; --i) {
+        dapush(output, daptr(buf)[i -1 ]);
       }
-      free(buf.ptr);
+      dafree(buf);
       if ((dtable.n_entries + 1 > (1 << bit_width)) &&
           (bit_width < LZW_MAX_ENTRY_EXP)) {
         bit_width++;
@@ -99,6 +100,6 @@ void lzw_decompress(unsigned char *src,
     }
   }
   lzw_table_deinit(&dtable);
-  *result = output.ptr;
-  *out_len = output.len;
+  *out_len = dalen(output);
+  *result = dapeel(output);
 }

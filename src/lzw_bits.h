@@ -12,21 +12,13 @@ enum lzw_bit_resource_type {
 struct lzw_bit_writer {
   enum lzw_bit_resource_type type;
   unsigned long bits;
-  struct lzw_buffer buf;
   unsigned char pos;
+  struct darray *buf;
 };
 
 struct lzw_bit_reader {
   enum lzw_bit_resource_type type;
   unsigned long bits;
-  /* union { */
-  /*   FILE *file; */
-  /*   struct { */
-  /*     unsigned long pos; */
-  /*     unsigned long size; */
-  /*     unsigned char *data; */
-  /*   } buf; */
-  /* } src; */
   struct {
     unsigned long pos;
     unsigned long size;

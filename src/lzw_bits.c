@@ -1,5 +1,5 @@
 #include "lzw_bits.h"
-#include "lzw_buffer.h"
+#include <darray.h>
 #include <stdlib.h>
 
 static unsigned long gen_mask(unsigned int len) {
@@ -63,8 +63,8 @@ void lzw_bw_init(struct lzw_bit_writer *b,
   if (!b) return;
   b->type = type;
   b->bits = 0;
-  lzw_buf_init(&b->buf, 1024);
   b->pos = 0;
+  b->buf = danew(1024);
 }
 
 void lzw_bw_pack(struct lzw_bit_writer *b,
@@ -78,7 +78,7 @@ void lzw_bw_pack(struct lzw_bit_writer *b,
   b->bits |= (bits << b->pos) & mask;
   b->pos += n_bits;
   while (b->pos >= 8) {
-    lzw_buf_push(&b->buf, b->bits & 0xff);
+    dapush(b->buf, b->bits & 0xff);
     b->pos -= 8;
     b->bits = (b->bits >> 8) & gen_mask(b->pos);
   }
@@ -87,9 +87,9 @@ void lzw_bw_pack(struct lzw_bit_writer *b,
 unsigned char *lzw_bw_result(struct lzw_bit_writer *b) {
   if (!b) return NULL;
   if (b->pos) {
-    lzw_buf_push(&b->buf, (unsigned char) (b->bits & gen_mask(b->pos)));
+    dapush(b->buf, (unsigned char) (b->bits & gen_mask(b->pos)));
   }
-  return b->buf.ptr;
+  return dapeel(b->buf);
 }
 
 void lzw_br_init(struct lzw_bit_reader *r,
