@@ -1,7 +1,6 @@
 #ifndef LZW_BITS_H
 #define LZW_BITS_H
 
-#include "lzw_buffer.h"
 #include <stdio.h>
 
 enum lzw_bit_resource_type {
