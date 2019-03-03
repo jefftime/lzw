@@ -84,12 +84,12 @@ void lzw_bw_pack(struct lzw_bit_writer *b,
   }
 }
 
-unsigned char *lzw_bw_result(struct lzw_bit_writer *b) {
+struct darray *lzw_bw_result(struct lzw_bit_writer *b) {
   if (!b) return NULL;
   if (b->pos) {
     dapush(b->buf, (unsigned char) (b->bits & gen_mask(b->pos)));
   }
-  return dapeel(b->buf);
+  return b->buf;
 }
 
 void lzw_br_init(struct lzw_bit_reader *r,

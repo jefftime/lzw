@@ -13,6 +13,7 @@ void lzw_compress(unsigned char *src,
   unsigned char bit_width = bit_size + 1;
   struct lzw_bit_writer b;
   struct lzw_table ctable;
+  struct darray *result;
 
   if (!output) return;
   if (!out_len) return;
@@ -22,6 +23,7 @@ void lzw_compress(unsigned char *src,
     unsigned int code = 0;
     struct lzw_entry e = { 0 };
 
+    /* build up the next dictionary entry */
     do {
       e.val = *src++;
       e.prev = code;
@@ -41,8 +43,9 @@ void lzw_compress(unsigned char *src,
     src--;
   }
   lzw_table_deinit(&ctable);
-  *out_len = dalen(b.buf);
-  *output = lzw_bw_result(&b);
+  result = lzw_bw_result(&b);
+  *out_len = dalen(result);
+  *output = dapeel(result);
 }
 
 void lzw_decompress(unsigned char *src,

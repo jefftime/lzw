@@ -32,7 +32,7 @@ void lzw_bw_init(struct lzw_bit_writer *b,
 void lzw_bw_pack(struct lzw_bit_writer *b,
                  unsigned char n_bits,
                  unsigned int bits);
-unsigned char *lzw_bw_result(struct lzw_bit_writer *b);
+struct darray *lzw_bw_result(struct lzw_bit_writer *b);
 void lzw_br_init(struct lzw_bit_reader *r,
                  enum lzw_bit_resource_type type,
                  void *src,
