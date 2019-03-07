@@ -7,4 +7,8 @@ ANSI C LZW Compression/Decompression Library
 
 ## Installation
 
-To use this library, download the dependencies and add to your CMakeLists.txt file `add_subdirectory("path/to/dependency")` for each one.
+To use this library, download the dependencies and add to your CMakeLists.txt file
+
+`add_subdirectory("path/to/dependency")`
+
+for each one.
