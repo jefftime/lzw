@@ -5,11 +5,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void lzw_compress(unsigned char *src,
-                  unsigned long size,
-                  unsigned char bit_size,
-                  unsigned char **output,
-                  unsigned long *out_len) {
+void compress(unsigned char *src,
+              unsigned long size,
+              unsigned char bit_size,
+              unsigned char **output,
+              unsigned long *out_len,
+              int gif_format) {
   unsigned char bit_width = bit_size + 1;
   struct lzw_bit_writer b;
   struct lzw_table ctable;
@@ -19,6 +20,7 @@ void lzw_compress(unsigned char *src,
   if (!out_len) return;
   lzw_bw_init(&b, BIT_BUFFER, NULL);
   lzw_table_init(&ctable, LZW_TABLE_COMPRESS, bit_size);
+  if (gif_format) lzw_bw_pack(&b, bit_width, 1 << bit_size);
   for (;;) {
     unsigned int code = 0;
     struct lzw_entry e = { 0 };
@@ -42,10 +44,32 @@ void lzw_compress(unsigned char *src,
     size++;
     src--;
   }
+  /* end of stream code for GIFs */
+  if (gif_format) lzw_bw_pack(&b, bit_width, (1 << bit_size) + 1);
   lzw_table_deinit(&ctable);
   result = lzw_bw_result(&b);
   *out_len = dalen(result);
   *output = dapeel(result);
+}
+
+/* **************************************** */
+/* Public */
+/* **************************************** */
+
+void lzw_compress(unsigned char *src,
+                  unsigned long size,
+                  unsigned char bit_size,
+                  unsigned char **result,
+                  unsigned long *out_len) {
+  compress(src, size, bit_size, result, out_len, 0);
+}
+
+void lzw_compress_gif(unsigned char *src,
+                      unsigned long size,
+                      unsigned char bit_size,
+                      unsigned char **result,
+                      unsigned long *out_len) {
+  compress(src, size, bit_size, result, out_len, 1);
 }
 
 void lzw_decompress(unsigned char *src,
