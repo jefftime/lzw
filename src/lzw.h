@@ -4,17 +4,17 @@
 void lzw_compress(unsigned char *src,
                   unsigned long size,
                   unsigned char bit_size,
-                  unsigned char **output,
-                  unsigned long *out_len);
+                  unsigned long *out_len,
+                  unsigned char **output);
 void lzw_compress_gif(unsigned char *src,
                       unsigned long size,
                       unsigned char bit_size,
-                      unsigned char **output,
-                      unsigned long *out_len);
+                      unsigned long *out_len,
+                      unsigned char **output);
 void lzw_decompress(unsigned char *src,
                     unsigned long size,
                     unsigned char bit_size,
-                    unsigned char **output,
-                    unsigned long *out_len);
+                    unsigned long *out_len,
+                    unsigned char **output);
 
 #endif

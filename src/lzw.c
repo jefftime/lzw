@@ -8,8 +8,8 @@
 void compress(unsigned char *src,
               unsigned long size,
               unsigned char bit_size,
-              unsigned char **output,
               unsigned long *out_len,
+              unsigned char **output,
               int gif_format) {
   unsigned char bit_width = bit_size + 1;
   struct lzw_bit_writer b;
@@ -59,24 +59,24 @@ void compress(unsigned char *src,
 void lzw_compress(unsigned char *src,
                   unsigned long size,
                   unsigned char bit_size,
-                  unsigned char **result,
-                  unsigned long *out_len) {
-  compress(src, size, bit_size, result, out_len, 0);
+                  unsigned long *out_len,
+                  unsigned char **result) {
+  compress(src, size, bit_size, out_len, result, 0);
 }
 
 void lzw_compress_gif(unsigned char *src,
                       unsigned long size,
                       unsigned char bit_size,
-                      unsigned char **result,
-                      unsigned long *out_len) {
-  compress(src, size, bit_size, result, out_len, 1);
+                      unsigned long *out_len,
+                      unsigned char **result) {
+  compress(src, size, bit_size, out_len, result, 1);
 }
 
 void lzw_decompress(unsigned char *src,
                     unsigned long size,
                     unsigned char bit_size,
-                    unsigned char **result,
-                    unsigned long *out_len) {
+                    unsigned long *out_len,
+                    unsigned char **result) {
   unsigned char bit_width = bit_size + 1;
   unsigned int code;
   struct lzw_bit_reader b;
@@ -88,7 +88,7 @@ void lzw_decompress(unsigned char *src,
   if (!out_len) return;
   output = danew(4096);
   lzw_table_init(&dtable, LZW_TABLE_DECOMPRESS, bit_size);
-  lzw_br_init(&b, BIT_BUFFER, src, size);
+  lzw_br_init(&b, BIT_BUFFER, size, src);
   while (lzw_br_read(&b, bit_width, &code)) {
     struct lzw_entry cur;
 

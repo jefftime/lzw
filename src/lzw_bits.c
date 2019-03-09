@@ -94,8 +94,8 @@ struct darray *lzw_bw_result(struct lzw_bit_writer *b) {
 
 void lzw_br_init(struct lzw_bit_reader *r,
                  enum lzw_bit_resource_type type,
-                 void *src,
-                 unsigned long src_size) {
+                 unsigned long src_size,
+                 void *src) {
   if (!r) return;
   if (!src) return;
   r->type = type;
