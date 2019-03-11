@@ -5,9 +5,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void compress(unsigned char *src,
+void compress(unsigned char bit_size,
               unsigned long size,
-              unsigned char bit_size,
+              unsigned char *src,
               unsigned long *out_len,
               unsigned char **output,
               int gif_format) {
@@ -56,25 +56,25 @@ void compress(unsigned char *src,
 /* Public */
 /* **************************************** */
 
-void lzw_compress(unsigned char *src,
+void lzw_compress(unsigned char bit_size,
                   unsigned long size,
-                  unsigned char bit_size,
+                  unsigned char *src,
                   unsigned long *out_len,
                   unsigned char **result) {
-  compress(src, size, bit_size, out_len, result, 0);
+  compress(bit_size, size, src, out_len, result, 0);
 }
 
-void lzw_compress_gif(unsigned char *src,
+void lzw_compress_gif(unsigned char bit_size,
                       unsigned long size,
-                      unsigned char bit_size,
+                      unsigned char *src,
                       unsigned long *out_len,
                       unsigned char **result) {
-  compress(src, size, bit_size, out_len, result, 1);
+  compress(bit_size, size, src, out_len, result, 1);
 }
 
-void lzw_decompress(unsigned char *src,
+void lzw_decompress(unsigned char bit_size,
                     unsigned long size,
-                    unsigned char bit_size,
+                    unsigned char *src,
                     unsigned long *out_len,
                     unsigned char **result) {
   unsigned char bit_width = bit_size + 1;
