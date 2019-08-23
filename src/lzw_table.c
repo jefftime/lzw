@@ -116,9 +116,9 @@ void lzw_table_add(struct lzw_table *t, struct lzw_entry *e) {
   if (!e) return;
   if (t->type == LZW_TABLE_COMPRESS) {
     if (t->n_entries < LZW_MAX_ENTRIES) {
-      unsigned int i;
+      size_t i;
 
-      i = hash16(e) % t->size;
+      i = (size_t) hash16(e) % t->size;
       while (t->initialized[i]) i = (i + 1) % t->size;
       e->code = t->n_entries;
       t->entries[i] = *e;

@@ -20,6 +20,7 @@
 #define LZW_TABLE_H
 
 #include <darray.h>
+#include <stddef.h>
 
 #define LZW_MAX_ENTRY_EXP 12
 #define LZW_MAX_ENTRIES (1 << LZW_MAX_ENTRY_EXP)
@@ -39,7 +40,7 @@ struct lzw_entry {
 struct lzw_table {
   enum lzw_table_type type;
   unsigned int n_entries;
-  unsigned long size;
+  size_t size;
   char *initialized;
   struct lzw_entry *entries;
 };
